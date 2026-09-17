@@ -1,0 +1,52 @@
+/* GymHub widget and utility styles.
+   The UI is Bootstrap-based; Tailwind preflight is intentionally not loaded
+   to avoid clashing with Bootstrap's component default styles.
+
+   Surfaces use Bootstrap 5.3 CSS variables so light and dark themes (driven
+   by html[data-bs-theme]) work with zero extra code. */
+
+.ai-widget .ai-widget-footer {
+    color: var(--bs-secondary-color);
+    font-size: .75rem;
+}
+
+.ai-chat {
+    height: 360px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.ai-chat .msg {
+    max-width: 85%;
+    padding: .55rem .8rem;
+    border-radius: .9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: .9rem;
+}
+
+.ai-chat .msg.user {
+    align-self: flex-end;
+    background: #0d6efd;
+    color: #fff;
+    border-bottom-right-radius: .2rem;
+}
+
+.ai-chat .msg.assistant {
+    align-self: flex-start;
+    background: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+    border-bottom-left-radius: .2rem;
+}
+
+.insights-list .insight-item {
+    padding: .5rem .75rem;
+    border-left: 3px solid #0d6efd;
+    background: var(--bs-tertiary-bg);
+    margin-bottom: .5rem;
+    border-radius: .25rem;
+    font-size: .9rem;
+    color: var(--bs-body-color);
+}

@@ -1,0 +1,50 @@
+# Render Blueprint — free-tier deployment for GymHub
+#
+# How to use:
+#   1. Push this repository to GitHub.
+#   2. Dashboard -> New -> Blueprint -> select the repo.
+#   3. After the first deploy, open the service -> Environment, set APP_URL to
+#      your real URL (e.g. https://gymhub.onrender.com), then deploy again.
+#
+# NOTE: free instances have an ephemeral filesystem, so SQLite data (gym
+# databases + any account you register) is recreated on each fresh boot and
+# is NOT guaranteed to persist. Migrations + the super-admin seed re-run on
+# every boot, so the app always comes up usable.
+
+services:
+  - type: web
+    name: gymhub
+    runtime: docker
+    repo: https://github.com/YOUR_USERNAME/YOUR_REPO # set to your repo
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    numInstances: 1
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: GymHub
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        value: base64:PNtInt5hmQ355kZXo0EbVBKtUleOuQwIon6iTT4db7A=
+      - key: APP_URL
+        value: https://gymhub.onrender.com
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "false"
+      - key: ADMIN_NAME
+        value: Platform Owner
+      - key: ADMIN_EMAIL
+        value: owner@gymhub.test
+      - key: ADMIN_PASSWORD
+        value: ChangeMe123!
