@@ -45,6 +45,9 @@ COPY --from=vendor /app/composer.lock ./composer.lock
 COPY --from=assets /app/public/build ./public/build
 COPY . .
 
+# Serve with our Caddy config (listens on $PORT), not the image default (:80).
+COPY Caddyfile /etc/frankenphp/Caddyfile
+
 RUN composer dump-autoload --no-dev --classmap-authoritative
 
 # Ensure runtime-writable directories exist before switching away from root.
@@ -71,4 +74,5 @@ USER www-data
 # Boot the platform database + super-admin seed, then serve. The container
 # filesystem is recreated on every deployment, so re-running the idempotent
 # migrate + seed keeps the app usable out of the box (same as render.yaml).
-CMD ["sh", "-c", "mkdir -p database/tenants && touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force && frankenphp run --config /etc/frankenphp/Caddyfile"]
+# Startup logs go to stderr and are visible in the Vercel runtime logs.
+CMD ["sh", "/app/docker/vercel-entrypoint.sh"]
