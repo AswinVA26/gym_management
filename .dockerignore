@@ -8,6 +8,12 @@
 README.md
 .idea/
 .vscode/
+.vercel
+.vercelignore
+vercel.json
+Caddyfile
+Dockerfile
+render.yaml
 node_modules
 vendor
 composer.phar

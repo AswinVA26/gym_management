@@ -1,0 +1,74 @@
+# ---------------------------------------------------------------------------
+# Vercel container deployment for GymHub (Laravel 13 + Vite/React)
+#
+# FrankenPHP combines the PHP runtime with a production Caddy web server.
+# Vercel builds this image, stores it in the Container Registry, and routes
+# all traffic to it via the catch-all rewrite in vercel.json.
+# ---------------------------------------------------------------------------
+
+# Stage 1: Composer production dependencies ----------------------------------
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --no-scripts \
+        --optimize-autoloader
+
+# Stage 2: Frontend assets (Vite / React) ------------------------------------
+FROM node:20-slim AS assets
+WORKDIR /app
+COPY .npmrc package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY resources ./resources
+COPY vite.config.js ./
+RUN npm run build
+
+# Stage 3: Runtime (FrankenPHP) ----------------------------------------------
+FROM dunglas/frankenphp:1-php8.4-bookworm AS runtime
+WORKDIR /app
+
+# pdo_sqlite / sqlite3 power the platform database and per-gym tenant files.
+RUN install-php-extensions pdo_sqlite sqlite3 intl zip
+
+# Composer is only kept around to finalize the autoloader after the app is
+# copied in (runs package discovery). It is not needed to serve requests.
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY --from=vendor /app/vendor ./vendor
+COPY --from=vendor /app/composer.json ./composer.json
+COPY --from=vendor /app/composer.lock ./composer.lock
+
+COPY --from=assets /app/public/build ./public/build
+COPY . .
+
+RUN composer dump-autoload --no-dev --classmap-authoritative
+
+# Ensure runtime-writable directories exist before switching away from root.
+RUN mkdir -p database/tenants \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && chown -R www-data:www-data /app /config/caddy /data/caddy \
+    && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
+
+ENV PORT=80 \
+    APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_CHANNEL=stderr \
+    DB_CONNECTION=sqlite \
+    CACHE_STORE=database \
+    SESSION_DRIVER=database \
+    QUEUE_CONNECTION=sync
+
+USER www-data
+
+# Boot the platform database + super-admin seed, then serve. The container
+# filesystem is recreated on every deployment, so re-running the idempotent
+# migrate + seed keeps the app usable out of the box (same as render.yaml).
+CMD ["sh", "-c", "mkdir -p database/tenants && touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force && frankenphp run --config /etc/frankenphp/Caddyfile"]

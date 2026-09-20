@@ -1,0 +1,12 @@
+# FrankenPHP / Caddy configuration used by the Vercel container.
+# %PORT% is injected by Vercel; fall back to 80 when running locally.
+:{$PORT:80} {
+    # Only expose Laravel's public directory.
+    root * /app/public
+    encode zstd gzip
+
+    # Route everything PHP can't serve to public/index.php.
+    php_server {
+        try_files {path} index.php
+    }
+}

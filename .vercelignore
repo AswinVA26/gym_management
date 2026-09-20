@@ -1,0 +1,24 @@
+# Files excluded from the build context Vercel uploads for the container.
+# vendor / node_modules are rebuilt inside Dockerfile.vercel; public/build is
+# produced by the image's Vite stage.
+
+.git
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/build
+public/hot
+public/storage
+storage/logs/*
+storage/framework/*
+*.sqlite
+*.sqlite-journal
+tests
+.idea
+.vscode
+
+# Ignore the build/checksum metadata Vercel generates locally.
+.vercel
+.next

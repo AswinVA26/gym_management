@@ -7,6 +7,43 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Deploying to Vercel
+
+GymHub ships with a Vercel container-service setup (`vercel.json`, `Dockerfile.vercel`, `Caddyfile`). Vercel builds the FrankenPHP image, which compiles the Vite/React assets, installs Composer deps, and boots Laravel with Caddy serving `public/`.
+
+### 1. Environment variables
+
+Add these to the Vercel project (dashboard → Settings → Environment Variables, or `vercel env add`):
+
+| Name | Value |
+| --- | --- |
+| `APP_NAME` | `GymHub` |
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | `base64:2KIXCzdmHZh5aDqR0c8V5eXMA86uMlWQ0x/Ceat/uzc=` (run `php artisan key:generate --show` to make your own) |
+| `APP_URL` | `https://<your-project>.vercel.app` |
+| `DB_CONNECTION` | `sqlite` |
+| `SESSION_DRIVER` | `database` |
+| `CACHE_STORE` | `database` |
+| `QUEUE_CONNECTION` | `sync` |
+| `LOG_CHANNEL` | `stderr` |
+| `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | First-run super admin seed |
+| `AI_PROVIDER` / `AI_BASE_URL` / `AI_API_KEY` / `AI_MODEL` | Your AI provider (defaults to local Ollama) |
+
+### 2. Deploy
+
+```bash
+npm i -g vercel
+vercel --prod
+```
+
+For Git integration, import the repo in Vercel and keep `vercel.json` at the project root — the container `entrypoint` is `Dockerfile.vercel`. The app health-check is `GET /up`.
+
+### Notes
+
+- Vercel container filesystems are **not durable**: the SQLite platform database and per-gym tenant files are recreated on each deploy (migrate + super-admin seed run on boot). For durable data, switch `DB_CONNECTION` to an external MySQL/Postgres, move uploads to Vercel Blob, and run migrations in CI instead of at startup.
+- No background queue worker runs on Vercel; jobs execute in-request (`QUEUE_CONNECTION=sync`).
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
