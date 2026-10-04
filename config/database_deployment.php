@@ -82,12 +82,12 @@ return [
 
     'credentials' => [
         'driver' => 'mysql',
-        'url' => env('MYSQL_ADDON_URI'),
-        'host' => env('MYSQL_ADDON_HOST', 'b2mc2djajez7bbhmhno4-mysql.services.clever-cloud.com'),
-        'port' => env('MYSQL_ADDON_PORT', '3306'),
-        'database' => env('MYSQL_ADDON_DB', 'b2mc2djajez7bbhmhno4'),
-        'username' => env('MYSQL_ADDON_USER', 'ulvgbcilpd0crlwl'),
-        'password' => env('MYSQL_ADDON_PASSWORD', 'GlUagzy0b0P4bETbYQ5c'),
+        'url' => env('MYSQL_ADDON_URI') ?: null,
+        'host' => env('MYSQL_ADDON_HOST') ?: 'b2mc2djajez7bbhmhno4-mysql.services.clever-cloud.com',
+        'port' => env('MYSQL_ADDON_PORT') ?: '3306',
+        'database' => env('MYSQL_ADDON_DB') ?: 'b2mc2djajez7bbhmhno4',
+        'username' => env('MYSQL_ADDON_USER') ?: 'ulvgbcilpd0crlwl',
+        'password' => env('MYSQL_ADDON_PASSWORD') ?: 'GlUagzy0b0P4bETbYQ5c',
         'unix_socket' => '',
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
