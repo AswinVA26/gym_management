@@ -3,6 +3,18 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+/*
+|--------------------------------------------------------------------------
+| Deployment Environment
+|--------------------------------------------------------------------------
+|
+| Decides whether the application uses your local MySQL (.env DB_* values) or
+| the hosted MySQL add-on. Every value lives in config/database_deployment.php.
+|
+*/
+
+$deployment = require __DIR__.'/database_deployment.php';
+
 return [
 
     /*
@@ -17,7 +29,9 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => $deployment['deployed']
+        ? $deployment['connection']
+        : env('DB_CONNECTION', 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
@@ -44,7 +58,7 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
-        'mysql' => [
+        'mysql' => $deployment['deployed'] ? $deployment['credentials'] : [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
