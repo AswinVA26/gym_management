@@ -31,7 +31,11 @@ fi
 
 echo "[vercel] running migrations" >&2
 php artisan migrate --force --no-interaction \
-    || echo "[vercel] migrate failed; continuing so the server stays up" >&2
+    || echo "[vercel] ERROR: migrate failed; the database is left empty and" \
+       "every page will return 500 until it succeeds." \
+       "Check that pdo_mysql is installed in Dockerfile.vercel and that" \
+       "MYSQL_ADDON_* (or the credentials in config/database_deployment.php)" \
+       "point at a reachable MySQL server." >&2
 
 echo "[vercel] seeding platform super admin" >&2
 php artisan db:seed --force --no-interaction \

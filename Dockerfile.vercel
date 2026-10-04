@@ -31,8 +31,9 @@ RUN npm run build
 FROM dunglas/frankenphp:1-php8.4-bookworm AS runtime
 WORKDIR /app
 
-# pdo_sqlite / sqlite3 power the platform database and per-gym tenant files.
-RUN install-php-extensions pdo_sqlite sqlite3 intl zip
+# pdo_mysql powers the hosted MySQL database on every deployed environment.
+# pdo_sqlite / sqlite3 are kept for the test suite and local tenant files.
+RUN install-php-extensions pdo_mysql pdo_sqlite sqlite3 intl zip
 
 # Composer is only kept around to finalize the autoloader after the app is
 # copied in (runs package discovery). It is not needed to serve requests.
@@ -64,7 +65,6 @@ ENV PORT=80 \
     APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
-    DB_CONNECTION=sqlite \
     CACHE_STORE=database \
     SESSION_DRIVER=database \
     QUEUE_CONNECTION=sync
